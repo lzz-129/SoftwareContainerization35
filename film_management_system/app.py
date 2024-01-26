@@ -1,7 +1,7 @@
 from flask import Flask
 import pandas as pd
 
-from extension import db
+from utils import db
 
 
 app = Flask(__name__)
