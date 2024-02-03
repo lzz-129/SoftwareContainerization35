@@ -1,0 +1,7 @@
+flask
+Flask-SQLAlchemy
+psycopg2-binary
+sqlalchemy
+flask_sqlalchemy
+flask_cors
+PyJWT

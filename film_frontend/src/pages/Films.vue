@@ -128,6 +128,18 @@
       <el-table-column prop="imdb_score" label="IMDB Score" sortable="custom"></el-table-column>
       <el-table-column prop="num_voted_users" label="Votes" sortable="custom"></el-table-column>
       <el-table-column prop="gross" label="Gross" sortable="custom"></el-table-column>
+      <el-table-column fixed="right" label="Operations" width="120">
+        <template #default="scope">
+          <el-button
+              link
+              type="primary"
+              size="small"
+              @click.prevent="goComment(scope.$index)"
+          >
+            Go to comment
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination
         @size-change="handleSizeChange"
@@ -148,6 +160,8 @@ import {computed, ref} from 'vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 import { Plus, Search, Close, Refresh } from '@element-plus/icons-vue'
+import router from "../router/index.js";
+import {useRouter} from "vue-router";
 
 
 // 搜索查询对象
@@ -242,6 +256,27 @@ const formatActors = (row, column, cellValue, index) => {
   return row.actors.join(', ');
 };
 
+const router = useRouter();
+const goComment = async (index) => {
+  const movie_title = tableData.value[index].movie_title; // 假设 tableData 是包含所有电影数据的数组
+  // 你可以在这里使用 movieName，例如跳转到相应的评论页面
+  const token = localStorage.getItem('authToken');
+  if (token){
+    const response = await axios.post('http://localhost:12345/rates', {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        movie_title: movie_title
+      }
+    });
+  }else{
+    
+  }
+
+  console.log(movie_title); // 或者进行其他操作
+};
 //TODO 标题
 </script>
 
