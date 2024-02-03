@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (user_name, password, email) VALUES
-('johndoe', 'johnssecurepassword', 'johndoe@example.com'),
-('janedoe', 'janessecurepassword', 'janedoe@example.com');
+-- INSERT INTO users (user_name, password, email) VALUES
+-- ('johndoe', 'johnssecurepassword', 'johndoe@example.com'),
+-- ('janedoe', 'janessecurepassword', 'janedoe@example.com');
 
 -- movies
 CREATE TABLE IF NOT EXISTS movies (
@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS movies (
     movie_imdb_link VARCHAR(255),
     director_name VARCHAR(255),
     imdb_score DECIMAL(3, 1),
+    num_voted_users INT,
     gross DECIMAL(15, 2)
 );
 
@@ -82,10 +83,10 @@ CREATE TABLE IF NOT EXISTS movie_users (
     PRIMARY KEY (user_id, movie_title)
 );
 
-INSERT INTO movie_users (user_id, movie_title, rating, comment)
-VALUES
-(1, 'Avatar', 4, 'Epic conclusion to the Pirates saga. A must-watch!'),
-(2, 'Spectre', 3, 'Spectre was visually stunning but lacked the punch of previous Bond films.');
+-- INSERT INTO movie_users (user_id, movie_title, rating, comment)
+-- VALUES
+-- (1, 'Avatar', 4, 'Epic conclusion to the Pirates saga. A must-watch!'),
+-- (1, 'Spectre', 3, 'Spectre was visually stunning but lacked the punch of previous Bond films.');
 
 
 
