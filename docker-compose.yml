@@ -14,9 +14,9 @@ services:
       - ./database/csvs:/csvs
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
-  web:
+  backend:
     build: ./film_backend
     volumes:
       - ./film_backend:/app
@@ -28,6 +28,13 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:mysecretpassword@db:5432/moviesmanagement
+
+  frontend:
+    build: ./film_frontend
+    ports:
+      - "80:80" # 将宿主机的端口 80 映射到容器的端口 80
+    depends_on:
+      - backend # 假设你的后端服务名为 backend
 
 networks:
   myappnet:
