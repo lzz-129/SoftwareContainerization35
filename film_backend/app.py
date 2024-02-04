@@ -234,10 +234,15 @@ class RatingApi(MethodView):
 
 
     def post(self):
-        user_id = request.form['user_id']
+        #user_id = request.form['user_id']
+        current_user = g.get('current_user', None)
+        user = User.query.filter(User.user_name == current_user).first()
+        user_id = user.user_id
         movie_title = request.form['movie_title']
         rating = request.form['rating']
         comment = request.form['comment']
+
+
 
         query = MovieUser.query
         user_movie = query.filter(MovieUser.user_id == user_id, \
@@ -252,26 +257,26 @@ class RatingApi(MethodView):
                                comment = comment)
             db.session.add(new_cr)
             db.session.commit()
-            response = jsonify({'message':'Comment Post Successfully','category':'success'})
-            return response
+            response = jsonify({'message':'Comment Post Successfully','category':'success', 'username':current_user})
+            return response,200
 
-    def put(self):
-        user_id = request.form['user_id']
-        movie_title = request.form['movie_title']
-        rating = request.form['rating']
-        comment = request.form['comment']
-
-        query = MovieUser.query
-        user_movie = query.filter(MovieUser.user_id == user_id, MovieUser.movie_title == movie_title).first()
-        if user_movie:
-            user_movie.rating = rating
-            user_movie.comment = comment
-            db.session.commit()
-            response = jsonify({'message': 'Comment Modified Successfully', 'category': 'success'})
-            return response
-        else:
-            response = jsonify({'message': 'Your Movie NOT found', 'category': 'warning'})
-            return response,404
+    # def put(self):
+    #     user_id = request.form['user_id']
+    #     movie_title = request.form['movie_title']
+    #     rating = request.form['rating']
+    #     comment = request.form['comment']
+    #
+    #     query = MovieUser.query
+    #     user_movie = query.filter(MovieUser.user_id == user_id, MovieUser.movie_title == movie_title).first()
+    #     if user_movie:
+    #         user_movie.rating = rating
+    #         user_movie.comment = comment
+    #         db.session.commit()
+    #         response = jsonify({'message': 'Comment Modified Successfully', 'category': 'success'})
+    #         return response
+    #     else:
+    #         response = jsonify({'message': 'Your Movie NOT found', 'category': 'warning'})
+    #         return response,404
 
 
 

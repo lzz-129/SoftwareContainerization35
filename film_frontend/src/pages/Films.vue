@@ -8,9 +8,10 @@
     <!-- @click="toggleAdvancedSearch"： click 时触发 toggleAdvancedSearch 方法。toggleAdvancedSearch 控制显示(vshow=TRUR)或隐藏高级搜索。 -->
     <!-- v-if="!showAdvancedSearch": default true -->
     <div v-if="!showAdvancedSearch" class="search-container">
-      <el-button @click="toggleAdvancedSearch" class="search-toggle">
-        <el-icon><Plus /></el-icon>
-      </el-button>
+      <el-icon :size="size" :color="color" @click="onLogin">
+        <UserFilled />
+      </el-icon>
+
       <div class="inputs-container">
         <el-input v-model="searchQuery.movie_title" placeholder="Search by movie title">
           <!-- 插槽 slot：添加HTML内容 -->
@@ -21,6 +22,9 @@
           </template>
         </el-input>
       </div>
+      <el-button @click="toggleAdvancedSearch" class="search-toggle">
+        <el-icon><Plus /></el-icon>
+      </el-button>
     </div>
 
     <!-- Advanced search （form） -->
@@ -108,7 +112,7 @@
   <!--      TODO advanced查询成功，clear/close 时清空table  table reset-->
   <!-- Films table -->
   <!-- TODO 格式化显示Gross -->
-  <div>
+  <div class="table-container">
     <el-table :data="tableData" @sort-change="handleSortChange" style="width: 100%" >
       <el-table-column prop="movie_title" label="Movie Title"></el-table-column>
       <el-table-column prop="title_year" label="Year"></el-table-column>
@@ -130,13 +134,8 @@
       <el-table-column prop="gross" label="Gross" sortable="custom"></el-table-column>
       <el-table-column fixed="right" label="Operations" width="120">
         <template #default="scope">
-          <el-button
-              link
-              type="primary"
-              size="small"
-              @click.prevent="goComment(scope.$index)"
-          >
-            Go to comment
+          <el-button plain @click="popComm(scope.$index)">
+            Add<br>Comment
           </el-button>
         </template>
       </el-table-column>
@@ -151,6 +150,24 @@
         layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
   </div>
+  <el-dialog v-model="outerVisible" title="Leave your comment" width="800">
+    <span class="demonstration">Rating: </span>
+    <el-rate v-model="value" size="small" />
+    <el-input
+        v-model="textarea"
+        :rows="2"
+        type="textarea"
+        placeholder="Your comments"
+    />
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="outerVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="submitCom">
+          Submit
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 
 
 </template>
@@ -160,8 +177,10 @@ import {computed, ref} from 'vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 import { Plus, Search, Close, Refresh } from '@element-plus/icons-vue'
-// import router from "../router/index.js";
 import {useRouter} from "vue-router";
+import {
+  UserFilled,
+} from '@element-plus/icons-vue'
 
 
 // 搜索查询对象
@@ -257,26 +276,61 @@ const formatActors = (row, column, cellValue, index) => {
 };
 
 const router = useRouter();
-const goComment = async (index) => {
-  const movie_title = tableData.value[index].movie_title; // 假设 tableData 是包含所有电影数据的数组
-  // 你可以在这里使用 movieName，例如跳转到相应的评论页面
+const value = ref(null)
+const textarea = ref('')
+const outerVisible = ref(false)
+const innerVisible = ref(false)
+const movie_title = ref("")
+
+const onLogin = async () => {
   const token = localStorage.getItem('authToken');
-  if (token){
+  await router.push('/login')
+
+}
+const  popComm = async (index) => {
+  movie_title.value = tableData.value[index].movie_title;
+  outerVisible.value = true
+  console.log(movie_title.value)
+}
+const submitCom = async () => {
+  const token = localStorage.getItem('authToken');
+  console.log(token)
+  const rate = value.value;
+  const comment = textarea.value
+  console.log(rate)
+  console.log(comment)
+  try{
     const response = await axios.post('http://localhost:12345/rates', {
+      movie_title: movie_title.value,
+      rating: rate,
+      comment: comment
+    }, {
       withCredentials: true,
       headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: {
-        movie_title: movie_title
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
       }
     });
-  }else{
-    
+    if(response.status === 200){
+      let username;
+      username = response.data.username;
+
+      setTimeout(() => {
+        router.push({name: 'User', params: {username:username}});
+      }, 1000);
+    }
+
+  }catch (error){
+    if (error.response && error.response.status === 401) {
+      // 如果状态码是 401，重定向到登录页面
+      router.push('/login');
+    } else {
+      // 处理其他错误
+      console.error('An error occurred:', error);
+    }
   }
 
-  console.log(movie_title); // 或者进行其他操作
-};
+}
 //TODO 标题
 </script>
 
@@ -296,19 +350,21 @@ const goComment = async (index) => {
 }
 
 .search-container {
-  position: relative; /* 设置相对定位，作为绝对定位子元素的参照 */
-  padding-top: 16px; /* Make space for the button, adjust as needed */
-}
-
-.search-toggle {
-  position: absolute; /* 绝对定位 */
-  top: 0; /* 与父容器顶部对齐 */
-  right: 0; /* 与父容器右部对齐 */
-  margin: 16px; /* 或者根据需要调整按钮的具体位置 */
+  display: flex;
+  align-items: center; /* 使所有子项垂直居中 */
 }
 
 .inputs-container {
-  margin-right: 80px; /* Adjust this value based on the width of your button */
+  flex-grow: 1; /* 输入容器将填充剩余空间 */
+  margin-left: 10px; /* 根据需要调整间距 */
+}
+
+.search-toggle {
+  margin-left: 10px; /* 根据需要调整间距 */
+}
+
+.login-icon {
+  margin-right: 10px; /* 根据需要调整间距 */
 }
 
 .slider-score-block {
@@ -318,6 +374,36 @@ const goComment = async (index) => {
 .slider-score-block .el-slider {
   margin-top: 0;
   margin-left: 12px;
+}
+
+.table-container {
+  margin: 15px; /* 整个表格容器的外边距 */
+  padding: 15px; /* 内边距 */
+  border: 1px solid #ebeef5; /* 边框颜色，与Element UI默认样式协调 */
+  border-radius: 4px; /* 圆角边框 */
+  background-color: #fff; /* 背景颜色 */
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1); /* 阴影效果 */
+}
+
+/* 适当的空间分隔，让表格和分页组件之间有一些距离 */
+.el-table {
+  margin-bottom: 20px; /* 表格和分页之间的空间 */
+}
+
+.el-pagination {
+  text-align: center; /* 分页组件居中显示 */
+}
+
+/* 在较小屏幕上适当调整布局 */
+@media (max-width: 768px) {
+  .table-container {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .el-pagination {
+    text-align: left; /* 在小屏幕上，分页组件左对齐可能更合适 */
+  }
 }
 
 </style>

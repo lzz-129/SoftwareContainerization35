@@ -11,7 +11,7 @@
               border
           >
             <template #extra>
-              <el-button type="primary">Log out</el-button>
+              <el-button type="primary" @click="logout">Log out</el-button>
             </template>
             <el-descriptions-item>
               <template #label>
@@ -73,25 +73,10 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="movie_imdb_link" label="IMDB Link"></el-table-column>
-          <el-table-column fixed="right" label="Operations" width="120">
-            <template #default="scope">
-              <el-button
-                  link
-                  type="primary"
-                  size="small"
-                  @click.prevent="deleteRow(scope.$index)"
-              >
-                Remove
-              </el-button>
-              <el-button
-                  link
-                  type="primary"
-                  size="small"
-                  @click.prevent="deleteRow(scope.$index)"
-              >
-                Edit
-              </el-button>
+          <el-table-column label="IMDB Link">
+            <template #default="{ row }">
+              <!-- 这里将字符串显示为一个可点击的链接 -->
+              <a :href="row.movie_imdb_link" target="_blank">{{ row.movie_imdb_link }}</a>
             </template>
           </el-table-column>
         </el-table>
@@ -106,7 +91,7 @@
 
 <script setup lang="ts">
 
-import {ref, onMounted, computed, reactive} from 'vue';
+import {ref, onMounted, computed, reactive, markRaw} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import axios from 'axios';
 import {
@@ -247,14 +232,13 @@ onMounted(async () => {
 console.log(tableData);
 
 
-
-const deleteRow = (index: number) => {
-  tableData.splice(index, 1)
-}
-
 const onAddItem = () => {
   router.replace('/films');
+}
 
+const logout = () => {
+  localStorage.removeItem('authToken');
+  router.push('/');
 }
 
 </script>
