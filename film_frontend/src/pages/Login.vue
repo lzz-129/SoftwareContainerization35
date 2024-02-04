@@ -56,7 +56,7 @@ const form = reactive({
 const message = ref('');
 const submitForm = async() => {
   try {
-    const response = await axios.post('http://localhost:12345/login', form,
+    const response = await axios.post('http://filmcomments-api-service:5000/login', form,
         {headers: {'Content-Type': 'multipart/form-data'}});
 
     console.log(response);

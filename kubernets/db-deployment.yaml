@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data-pvc
+      - name: csv-volume
+        emptyDir: {}
+      - name: init-volume
+        emptyDir: {}
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: db-credentials
+      initContainers:
+      - name: init-db
+        image: google/cloud-sdk
+        command:
+        - 'sh'
+        - '-c'
+        - >
+          gsutil cp gs://kube_database/init.sql /docker-entrypoint-initdb.d/init.sql && gsutil -m cp -r gs://kube_database/csvs/* /csvs
+        volumeMounts:
+        - name: init-volume
+          mountPath: /docker-entrypoint-initdb.d
+        - name: csv-volume
+          mountPath: /csvs
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets
+          readOnly: true
+      containers:
+      - name: postgres
+        image: postgres:latest
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: postgres-db
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-volume
+          mountPath: /docker-entrypoint-initdb.d
+        - name: csv-volume
+          mountPath: /csvs
+      restartPolicy: Always
+

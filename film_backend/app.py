@@ -1,6 +1,7 @@
 from functools import wraps
 from urllib.parse import quote_plus
 import jwt
+import os
 
 from flask import Flask, request, jsonify, g
 from flask.views import MethodView
@@ -21,10 +22,13 @@ app.config['SECRET_KEY'] = conf.SECRET_KEY  # Make sure to set this to a secure 
 cors.init_app(app, supports_credentials=True)  # 允许跨域携带凭证
 
 # sql database
-db_user = conf.DBUSER
-db_password = quote_plus(conf.DBPW)  # URL encoded
-db_host = conf.DBADDR
-db_name = conf.DATABASE
+
+
+db_user = os.environ.get('POSTGRES_USER')
+db_password = os.environ.get('POSTGRES_PASSWORD')
+db_host = 'postgres-service'  # 这里是你的 PostgreSQL 服务的名称
+db_name = os.environ.get('POSTGRES_DB')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

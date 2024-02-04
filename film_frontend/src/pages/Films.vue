@@ -253,7 +253,7 @@ const handleSortChange = ({ prop, order }) => {
 };
 const fetchData = async () => {
   try {
-    const response = await axios.get('http://localhost:12345/films', {
+    const response = await axios.get('http://filmcomments-api-service:5000/films', {
       params: {
         ...searchQuery.value,
         page: currentPage.value,
@@ -300,7 +300,7 @@ const submitCom = async () => {
   console.log(rate)
   console.log(comment)
   try{
-    const response = await axios.post('http://localhost:12345/rates', {
+    const response = await axios.post('http://filmcomments-api-service:5000/rates', {
       movie_title: movie_title.value,
       rating: rate,
       comment: comment
