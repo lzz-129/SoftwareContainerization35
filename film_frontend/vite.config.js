@@ -7,9 +7,10 @@ export default defineConfig({
 
   //server
   server: {
-      port: 3000, // Guest port in VM
+      port: 80, // Guest port in VM
       host: '0.0.0.0'
   },
+
 })
 
 // vue.config.js

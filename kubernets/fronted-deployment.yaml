@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: filmcomments-fronted-container
-        image: liuzhe2022/filmcomments-web:amd
+        image: liuzhe2022/filmcomments-web:lastest
         ports:
         - containerPort: 80
 
@@ -29,5 +29,5 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 3000
+    targetPort: 80
   type: LoadBalancer

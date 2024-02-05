@@ -156,7 +156,7 @@ onMounted(async () => {
   const token = localStorage.getItem('authToken');
   try {
     //query user
-    const response1 = await axios.get('http://filmcomments-api-service:5000/user', {
+    const response1 = await axios.get(`${import.meta.env.VITE_API_URL}/user`, {
       withCredentials: true,
       headers: {
         Authorization: `Bearer ${token}`
@@ -175,7 +175,7 @@ onMounted(async () => {
       try {
         const movie_title = movie.movie_title;
         // 获取电影信息
-        const response2 = await axios.get(`http://filmcomments-api-service:5000/films`, {
+        const response2 = await axios.get(`${import.meta.env.VITE_API_URL}/films`, {
           withCredentials: true,
           params: { movie_title }
         });
@@ -198,7 +198,7 @@ onMounted(async () => {
         };
 
         // 获取当前电影的用户评分和评论
-        const response3 = await axios.get(`http://filmcomments-api-service:5000/rates`, {
+        const response3 = await axios.get(`${import.meta.env.VITE_API_URL}/rates`, {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`

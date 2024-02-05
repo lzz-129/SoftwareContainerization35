@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "filmcomments-chart.fullname" . }}-api-service
+spec:
+  selector:
+    app: {{ .Values.backend.api.app }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.backend.api.service.port }}
+    targetPort: {{ .Values.backend.api.service.targetPort }}
+  type: {{ .Values.backend.api.service.type }}

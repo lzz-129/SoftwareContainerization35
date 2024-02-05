@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.postgres.name }}
+spec:
+  replicas: {{ .Values.postgres.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.postgres.label }}
+  strategy:
+    type: {{ .Values.postgres.strategy.type }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.postgres.label }}
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: {{ .Values.postgres.persistence.volumeClaimName }}
+      - name: csv-volume
+        emptyDir: {}
+      - name: init-volume
+        emptyDir: {}
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: {{ .Values.postgres.cloudsqlCreds.secretName }}
+      initContainers:
+      - name: init-db
+        image: {{ .Values.postgres.init.image }}
+        command:
+        - 'sh'
+        - '-c'
+        - >
+          gsutil cp gs://kube_database/init.sql /docker-entrypoint-initdb.d/init.sql && gsutil -m cp -r gs://kube_database/csvs/* /csvs
+        volumeMounts:
+        - name: init-volume
+          mountPath:  {{ .Values.postgres.init.mountPath }}
+        - name: csv-volume
+          mountPath: {{ .Values.postgres.init.csvMountPath }}
+        - name: cloudsql-instance-credentials
+          mountPath: {{ .Values.postgres.cloudsqlCreds.mountPath }}
+          readOnly: true
+      containers:
+      - name: postgres
+        image: {{ .Values.postgres.image }}
+        imagePullPolicy: {{ .Values.postgres.imagePullPolicy }}
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{.value.secret.name}} #db-credentials
+              key: {{ .Values.secret.postgresDb | b64enc }}
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{.value.secret.name}}
+              key: {{ .Values.secret.postgresUser | b64enc }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{.value.secret.name}}
+              key: {{ .Values.secret.postgresPassword | b64enc }}
+        - name: PGDATA
+          value:  {{ .Values.postgres.persistence.mountPath }}/pgdata
+        ports:
+        - containerPort: {{ (index .Values.postgres.ports 0).containerPort }}
+        volumeMounts:
+        - name: db-data
+          mountPath: {{ .Values.postgres.persistence.mountPath }}
+        - name: init-volume
+          mountPath: {{ .Values.postgres.init.mountPath }}
+        - name: csv-volume
+          mountPath: {{ .Values.postgres.init.csvMountPath }}
+      restartPolicy: Always
+

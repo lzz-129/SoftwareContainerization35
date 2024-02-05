@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "filmcomments-chart.fullname" . }}-api
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.api.app }}
+  replicas: {{ .Values.backend.api.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.backend.api.app }}
+    spec:
+      containers:
+      - name: {{ .Values.backend.api.container.name }}
+        image: "{{ .Values.backend.api.container.image }}"
+        ports:
+        - containerPort: {{ .Values.backend.api.container.port }}
+          protocol: TCP
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.api.env.postgres.db.secret }}
+              key: {{ .Values.backend.api.env.postgres.db.key }}
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.api.env.postgres.user.secret }}
+              key: {{ .Values.backend.api.env.postgres.user.key }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.api.env.postgres.password.secret }}
+              key: {{ .Values.backend.api.env.postgres.password.key }}
+      restartPolicy: Always
