@@ -7,6 +7,11 @@ spec:
     matchLabels:
       app: {{ .Values.backend.api.app }}
   replicas: {{ .Values.backend.api.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.backend.api.strategy.maxUnavailable }}
+      maxSurge: {{ .Values.backend.api.strategy.maxSurge }}
   template:
     metadata:
       labels:
@@ -15,6 +20,10 @@ spec:
       containers:
       - name: {{ .Values.backend.api.container.name }}
         image: "{{ .Values.backend.api.container.image }}"
+        resources:
+          requests:
+            cpu: {{ .Values.cpu }}
+            memory: {{ .Values.memory }}
         ports:
         - containerPort: {{ .Values.backend.api.container.port }}
           protocol: TCP

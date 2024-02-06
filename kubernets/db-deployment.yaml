@@ -27,7 +27,7 @@ spec:
           secretName: db-credentials
       initContainers:
       - name: init-db
-        image: google/cloud-sdk
+        image: google/cloud-sdk:latest
         command:
         - 'sh'
         - '-c'
@@ -43,7 +43,11 @@ spec:
           readOnly: true
       containers:
       - name: postgres
-        image: postgres:latest
+        image: postgres
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
         env:
         - name: POSTGRES_DB
           valueFrom:

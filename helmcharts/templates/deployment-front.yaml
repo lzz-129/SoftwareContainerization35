@@ -15,5 +15,9 @@ spec:
       containers:
       - name: {{ .Values.frontend.container.name }}
         image: "{{ .Values.frontend.container.image }}"
+        resources:
+          requests:
+            cpu: {{ .Values.cpu }}
+            memory: {{ .Values.memory }}
         ports:
         - containerPort: {{ .Values.frontend.container.port }}
