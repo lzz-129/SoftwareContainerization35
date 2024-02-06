@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ .Values.managedCert.name }}
+spec:
+  domains: 
+{{ toYaml .Values.managedCert.domains | indent 4 }}

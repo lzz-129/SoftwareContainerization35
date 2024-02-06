@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.postgres.name }}
+  name: {{ include "filmcomments.fullname" . }}-postgres-deployment
 spec:
   replicas: {{ .Values.postgres.replicaCount }}
   selector:
@@ -49,17 +49,17 @@ spec:
         - name: POSTGRES_DB
           valueFrom:
             secretKeyRef:
-              name: {{.value.secret.name}} #db-credentials
+              name: {{ .Values.secret.name }} #db-credentials
               key: {{ .Values.secret.postgresDb | b64enc }}
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: {{.value.secret.name}}
+              name: {{ .Values.secret.name }}
               key: {{ .Values.secret.postgresUser | b64enc }}
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{.value.secret.name}}
+              name: {{ .Values.secret.name }}
               key: {{ .Values.secret.postgresPassword | b64enc }}
         - name: PGDATA
           value:  {{ .Values.postgres.persistence.mountPath }}/pgdata

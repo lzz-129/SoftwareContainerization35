@@ -1,0 +1,13 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-from-all
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: filmcomments-api
+  policyTypes:
+    - Ingress
+  ingress:
+    - {}

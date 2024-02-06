@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.cicdRoleBinding.name }}
+subjects: 
+{{ toYaml .Values.cicdRoleBinding.subjects | indent 2 }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.cicdRole.name }}
+  apiGroup: rbac.authorization.k8s.io

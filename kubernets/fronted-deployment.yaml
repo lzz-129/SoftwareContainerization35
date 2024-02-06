@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: filmcomments-fronted-container
-        image: liuzhe2022/filmcomments-web:lastest
+        image: liuzhe2022/filmcomments-web:v2
         ports:
         - containerPort: 80
 

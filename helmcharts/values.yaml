@@ -1,4 +1,4 @@
-# Default values for film-comments.
+# Default values for filmcomments.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -33,9 +33,9 @@
 
 secret:
   name: db-credentials
-  postgresDb: "moviesmanagement" # 在这里放入您的 base64 编码值
-  postgresUser: "postgres" # 在这里放入您的 base64 编码值
-  postgresPassword: "mysecretpassword" # 在这里放入您的 base64 编码值
+  postgresDb: bW92aWVzbWFuYWdlbWVudA==
+  postgresUser: cG9zdGdyZXM= # 在这里放入您的 base64 编码值
+  postgresPassword: bXlzZWNyZXRwYXNzd29yZA== # 在这里放入您的 base64 编码值
   serviceAccountKey: |
     {
       "type": "service_account",
@@ -57,7 +57,7 @@ frontend:
   replicas: 1
   container:
     name: filmcomments-frontend-container
-    image: liuzhe2022/filmcomments-web:latest
+    image: liuzhe2022/filmcomments-web:v2
     port: 80
   service:
     port: 80
@@ -96,7 +96,7 @@ backend:
 # runAsNonRoot: true
 # runAsUser: 1000
 
-postgres-service:
+postgresservice:
   service:
     type: ClusterIP
     port: 5432
@@ -111,7 +111,6 @@ pvc:
 
 postgres:
   replicaCount: 1
-  name: postgres-deployment
   label: postgres
   strategy:
     type: Recreate
@@ -138,6 +137,150 @@ postgres:
   ports:
   - containerPort: 5432
 
+hpa:
+  name: api-hpa
+  namespace: default
+  scaleTargetRef:
+    kind: Deployment
+    name: postgres-deployment
+  minReplicas: 1
+  maxReplicas: 6
+  metrics:
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+
+frontendHpa:
+  name: frontend-hpa
+  namespace: default
+  scaleTargetRef:
+    name: filmcomments-frontend-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    resource:
+      target:
+        averageUtilization: 50
+
+managedCert:
+  name: my-managed-cert
+  domains:
+  - myfilmcomm.com
+
+ingress:
+  name: "my-ingress"
+  managedCertificates: "my-managed-cert"
+  host: "my-filmcomments.com"
+  paths:
+    path: "/"
+    pathType: "Prefix"
+  service:
+    name: "filmcomments-fronted-service"
+    port: 80
+
+cicdRole:
+  name: my-cicd-role
+  rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "watch", "list", "create", "update", "patch", "delete"]
+
+cicdRoleBinding:
+  name: cicd-binding
+  subjects:
+  - kind: ServiceAccount
+    name: cicd-team
+    namespace: default
+    apiGroup: ""
+
+serviceAccount:
+  name: cicd-team
+  namespace: default
+
+role:
+  name: developer
+  rules:
+  - apiGroups: ["", "extensions", "apps"]
+    resources: ["deployments", "replicasets", "pods", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+
+roleBinding:
+  name: developer-binding
+  subjects:
+  - kind: User
+    name: lainuu666@gmail.com
+    apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: liuzhe6543@gmail.com
+    apiGroup: rbac.authorization.k8s.io
+
+clusterRole:
+  name: devops
+
+clusterRoleBinding:
+  name: devops-binding
+
+authserviceAccount:
+  name: devops-team
+  namespace: default
+
+networkPolicyapi:
+  name: allow-backend-from-all
+  matchLabels:
+    app: filmcomments-api
+
+networkPolicyfr:
+  name: allow-frontend-from-all
+  matchLabels:
+    app: filmcomments-frontend
+
+networkPolicy:
+  name: allow-db-access-from-frontend-backend
+  namespace: default
+  podSelector:
+    app: postgres
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: filmcomments-frontend
+    - podSelector:
+        matchLabels:
+          app: filmcomments-api
+
+Deployment:
+  name: myapp-rollup
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    app: filmcomments-frontend
+  container:
+    name: filmcomments-frontend-container
+    image: liuzhe2022/filmcomments-web:v2
+    port: 80
+
+  # appName: filmcomments-frontend
+  # containerName: filmcomments-frontend-container
+
+# stableDeployment:
+#   name: myapp-stable
+#   replicas: 5
+#   image: myapp:stable
+
+# canaryDeployment:
+#   name: myapp-canary
+#   replicas: 1 # Small number of pods for canary
+#   image: myapp:canary
   # service:
   #   type: ClusterIP
   #   port: 80

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: filmcomments-api-container
-        image: liuzhe2022/filmcomments-api:amd
+        image: liuzhe2022/filmcomments-api:v1
         ports:
         - containerPort: 5000
           protocol: TCP

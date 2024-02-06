@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "filmcomments-chart.fullname" . }}-db-data-pvc
+  name: {{ include "filmcomments.fullname" . }}-db-data-pvc
 spec:
   accessModes:
     - {{ .Values.pvc.accessMode }}
