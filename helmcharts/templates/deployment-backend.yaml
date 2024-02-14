@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "filmcomments.fullname" . }}-api-deployment
+  name: {{ .Values.backend.name }}
 spec:
   selector:
     matchLabels:
@@ -31,16 +31,16 @@ spec:
         - name: POSTGRES_DB
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.backend.api.env.postgres.db.secret }}
-              key: {{ .Values.backend.api.env.postgres.db.key }}
+              name: {{ .Values.secret.name }}
+              key: {{ .Values.secret.postgresDbKey }}
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.backend.api.env.postgres.user.secret }}
-              key: {{ .Values.backend.api.env.postgres.user.key }}
+              name: {{ .Values.secret.name }}
+              key: {{ .Values.secret.postgresUserKey }}
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.backend.api.env.postgres.password.secret }}
-              key: {{ .Values.backend.api.env.postgres.password.key }}
+              name: {{ .Values.secret.name }}
+              key: {{ .Values.secret.postgresPasswordKey }}
       restartPolicy: Always

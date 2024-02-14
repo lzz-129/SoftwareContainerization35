@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "filmcomments.fullname" . }}-postgres-deployment
+  name: {{ .Values.postgres.name }}
 spec:
   replicas: {{ .Values.postgres.replicaCount }}
   selector:
@@ -17,14 +17,14 @@ spec:
       volumes:
       - name: db-data
         persistentVolumeClaim:
-          claimName: {{ .Values.postgres.persistence.volumeClaimName }}
+          claimName: {{ .Values.pvc.name }}
       - name: csv-volume
         emptyDir: {}
       - name: init-volume
         emptyDir: {}
       - name: cloudsql-instance-credentials
         secret:
-          secretName: {{ .Values.postgres.cloudsqlCreds.secretName }}
+          secretName: {{ .Values.secret.name }}
       initContainers:
       - name: init-db
         image: {{ .Values.postgres.init.image }}
@@ -53,22 +53,22 @@ spec:
         - name: POSTGRES_DB
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.secret.name }} #db-credentials
-              key: {{ .Values.secret.postgresDb | b64enc }}
+              name: {{ .Values.secret.name }}
+              key: postgres-db
         - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: {{ .Values.secret.name }}
-              key: {{ .Values.secret.postgresUser | b64enc }}
+              key: postgres-user
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.secret.name }}
-              key: {{ .Values.secret.postgresPassword | b64enc }}
+              key: postgres-password
         - name: PGDATA
-          value:  {{ .Values.postgres.persistence.mountPath }}/pgdata
+          value:  {{ .Values.postgres.persistence.newmountpath }}
         ports:
-        - containerPort: {{ (index .Values.postgres.ports 0).containerPort }}
+        - containerPort: {{ .Values.postgres.ports }}
         volumeMounts:
         - name: db-data
           mountPath: {{ .Values.postgres.persistence.mountPath }}

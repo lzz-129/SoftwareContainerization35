@@ -1,0 +1,6 @@
+{
+    "yaml.schemas": {
+        "https://gitlab.com/appsemble/appsemble/-/raw/HEAD/packages/cli/assets/appsemblerc.schema.json": "file:///Users/liuzhe/SoftwareContainerization35/kubernets/db-deployment.yaml"
+    },
+    "git.ignoreLimitWarning": true
+}

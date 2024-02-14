@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "filmcomments.fullname" . }}-frontend
+  name: {{ .Values.frontend.name }}
 spec:
   selector:
     matchLabels:

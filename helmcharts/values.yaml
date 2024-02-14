@@ -4,10 +4,13 @@
 
 secret:
   name: db-credentials
-  postgresDb: bW92aWVzbWFuYWdlbWVudA==
-  postgresUser: cG9zdGdyZXM= # 在这里放入您的 base64 编码值
-  postgresPassword: bXlzZWNyZXRwYXNzd29yZA== # 在这里放入您的 base64 编码值
-  serviceAccountKey: |
+  postgresDbKey: postgres-db
+  postgresUserKey: postgres-user
+  postgresPasswordKey: postgres-password
+  postgresDbValue: bW92aWVzbWFuYWdlbWVudA==
+  postgresUserValue: cG9zdGdyZXM=
+  postgresPasswordValue: bXlzZWNyZXRwYXNzd29yZA==
+  serviceAccountKeyValue: |
     {
       "type": "service_account",
       "project_id": "kube2014",
@@ -23,6 +26,7 @@ secret:
     }
 
 frontend:
+  name: filmcomments-frontend-deployment
   selector:
     app: filmcomments-frontend
   replicas: 1
@@ -31,14 +35,17 @@ frontend:
     image: liuzhe2022/filmcomments-web:v2
     port: 80
   service:
+    name: filmcomments-fronted-service
     port: 80
     targetPort: 80
     type: LoadBalancer
+
 
 cpu: "250m"
 memory: "500Mi"
 
 backend:
+  name: filmcomments-api-deployment
   api:
     app: filmcomments-api
     replicaCount: 1
@@ -50,6 +57,7 @@ backend:
       image: liuzhe2022/filmcomments-api:v1
       port: 5000
     service:
+      name: filmcomments-api-service
       port: 5000
       targetPort: 5000
       type: LoadBalancer
@@ -74,6 +82,7 @@ backend:
 # runAsUser: 1000
 
 postgresservice:
+  name: postgres-service
   service:
     type: ClusterIP
     port: 5432
@@ -82,11 +91,13 @@ postgresservice:
     app: postgres
 
 pvc:
+  name: db-data-pvc
   accessMode: ReadWriteOnce
   size: 1Gi
   storageClassName: standard-rwo
 
 postgres:
+  name: postgres-deployment
   replicaCount: 1
   label: postgres
   strategy:
@@ -108,18 +119,18 @@ postgres:
   persistence:
     volumeClaimName: db-data-pvc
     mountPath: /var/lib/postgresql/data
+    newmountpath: /var/lib/postgresql/data/pgdata
   cloudsqlCreds:
     secretName: db-credentials
     mountPath: /secrets
-  ports:
-  - containerPort: 5432
+  ports: 5432
 
 hpa:
   name: api-hpa
   namespace: default
   scaleTargetRef:
     kind: Deployment
-    name: postgres-deployment
+    name: filmcomments-api-deployment
   minReplicas: 1
   maxReplicas: 3
   metrics:
@@ -149,7 +160,7 @@ managedCert:
 ingress:
   name: "my-ingress"
   managedCertificates: "my-managed-cert"
-  host: "my-filmcomments.com"
+  host: "myfilmcomm.com"
   paths:
     path: "/"
     pathType: "Prefix"
